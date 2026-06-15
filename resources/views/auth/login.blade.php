@@ -17,7 +17,13 @@
                         @if ($errors->get('email'))
                             <ul class="text-sm text-red-600 space-y-1 mt-2">
                                 @foreach ((array) $errors->get('email') as $message)
-                                    <li>{{ $message }}</li>
+                                    <li>
+                                        @if ($message === 'The email field is required.')
+                                            メールアドレスを入力してください
+                                        @else
+                                            {{ $message }}
+                                        @endif
+                                    </li>
                                 @endforeach
                             </ul>
                         @endif
@@ -31,13 +37,19 @@
                         <input id="password"
                             class="block mt-1 w-full border-gray-200 bg-gray-50 text-gray-900 placeholder-gray-300 focus:border-amber-500 focus:ring-amber-500 rounded-md shadow-sm px-3 py-2"
                             type="password" name="password" placeholder="password" required />
-                        @if ($errors->get('password'))
-                            <ul class="text-sm text-red-600 space-y-1 mt-2">
-                                @foreach ((array) $errors->get('password') as $message)
-                                    <li>{{ $message }}</li>
-                                @endforeach
-                            </ul>
-                        @endif
+                    @if ($errors->get('password'))
+                        <ul class="text-sm text-red-600 space-y-1 mt-2">
+                            @foreach ((array) $errors->get('password') as $message)
+                                <li>
+                                    @if ($message === 'The password field is required.')
+                                        パスワードを入力してください
+                                    @else
+                                        {{ $message }}
+                                    @endif
+                                </li>
+                            @endforeach
+                        </ul>
+                    @endif
                     </div>
 
                     <div class="flex items-center justify-center mt-6">
