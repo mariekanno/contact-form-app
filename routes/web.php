@@ -13,6 +13,8 @@ Route::post('/contacts', [ContactController::class, 'store']);
 
 Route::get('/thanks', [ContactController::class, 'thanks']);
 
+Route::get('/contacts/export', [ContactController::class, 'export']);
+
 Route::middleware('auth')->group(function () {
     Route::get('/admin', [AdminController::class, 'index'])
         ->name('admin.index');
