@@ -15,9 +15,33 @@ class ContactController extends Controller
      */
     public function index()
     {
-        $contacts = Contact::with(['category', 'tags'])
+        $contacts = Contact::with(['category', 'tags']);
+
+        if (request()->filled('keyword')) {
+            $contacts->where(function ($query) {
+                $query->where('first_name', 'LIKE', '%'.request('keyword').'%')
+                    ->orWhere('last_name', 'LIKE', '%'.request('keyword').'%')
+                    ->orWhere('email', 'LIKE', '%'.request('keyword').'%');
+            });
+        }
+
+        if (request()->filled('gender')) {
+            $contacts->where('gender', request('gender'));
+        }
+
+        if (request()->filled('category_id')) {
+            $contacts->where('category_id', request('category_id'));
+        }
+
+        if (request()->filled('date')) {
+            $contacts->whereDate('created_at', request('date'));
+        }
+
+        $perPage = request('per_page', 20);
+
+        $contacts = $contacts
             ->latest()
-            ->paginate(7);
+            ->paginate($perPage);
 
         return ContactResource::collection($contacts);
     }
