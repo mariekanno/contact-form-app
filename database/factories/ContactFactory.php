@@ -19,6 +19,7 @@ class ContactFactory extends Factory
     public function definition(): array
     {
         return [
+            'category_id' => Category::factory(),
             'first_name' => fake()->firstName(),
             'last_name' => fake()->lastName(),
             'gender' => fake()->numberBetween(1, 3),
@@ -27,7 +28,6 @@ class ContactFactory extends Factory
             'address' => fake()->address(),
             'building' => fake()->optional()->secondaryAddress(),
             'detail' => fake()->realText(50),
-            'category_id' => Category::inRandomOrder()->first()->id,
         ];
     }
 }

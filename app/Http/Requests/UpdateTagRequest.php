@@ -27,7 +27,7 @@ class UpdateTagRequest extends FormRequest
                 'required',
                 'string',
                 'max:50',
-                'unique:tags,name,'.$this->tag->id,
+                'unique:tags,name,'.optional($this->tag)->id,
             ],
         ];
     }

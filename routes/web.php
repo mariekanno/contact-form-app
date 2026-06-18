@@ -28,6 +28,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/tags/{tag}/edit', [TagController::class, 'edit'])
         ->name('admin.tags.edit');
 
+    Route::post('/admin/tags', [TagController::class, 'store'])
+        ->name('admin.tags.store');
+
     Route::put('/admin/tags/{tag}', [TagController::class, 'update'])
         ->name('admin.tags.update');
 
