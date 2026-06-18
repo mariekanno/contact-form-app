@@ -19,6 +19,13 @@ class TagController extends Controller
         return redirect()->route('admin.index');
     }
 
+    public function store(UpdateTagRequest $request)
+    {
+        Tag::create($request->only('name'));
+
+        return redirect()->route('admin.index');
+    }
+
     public function destroy(Tag $tag)
     {
         $tag->delete();

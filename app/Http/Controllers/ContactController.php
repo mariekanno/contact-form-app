@@ -65,7 +65,7 @@ class ContactController extends Controller
             $contacts->whereDate('created_at', $request->date);
         }
 
-        $contacts = $contacts->get();
+        $contacts = $contacts->latest()->get();
 
         $csvHeader = [
             'ID',
