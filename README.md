@@ -74,9 +74,9 @@ erDiagram
 
 ## 開発環境URL
 
-フロントエンド：http://localhost
-管理画面：http://localhost/admin
-phpMyAdmin:http://localhost:8080
+- フロントエンド：http://localhost
+- 管理画面：http://localhost/admin
+- phpMyAdmin:http://localhost:8080
 
 ## 動作環境
 
