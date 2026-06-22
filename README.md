@@ -1,8 +1,6 @@
 # COACHTECH お問い合わせフォーム
 
-お問い合わせの管理を行うシステムです。
-
-ユーザーはお問い合わせフォームから内容を送信でき、管理者はログイン後にお問い合わせの検索・閲覧・削除・CSV出力・タグ管理を行うことができます。また、お問い合わせ情報を操作する公開APIも実装しています。
+お問い合わせフォームの機能を実装したLaravelプロジェクトです。一般ユーザーがお問い合わせを送信でき、管理者がログイン後にその内容を確認・管理します。
 
 ## 作成者
 
@@ -11,58 +9,61 @@
 ## 使用技術
 
 - PHP 8.2
-- Laravel 10
+- Laravel 10.x
 - MySQL 8.0
-- Docker
-- Laravel Sail
-- Fortify
-- Tailwind CSS
+- Nginx
+- Docker/Docker Compose/Laravel Sail
+- Laravel Fortify(認証)
+- phpMyAdmin
 
 ## ER図
 
 ```mermaid
 erDiagram
     users {
-        bigint id PK
-        string name
-        string email
+        bigint_unsained id PK
+        varchar_255 name
+        varchar_255  email UK
         timestamp email_verified_at
-        string password
+        varchar_255 password
+        varchar_100 remenber_token
+        timestamp created_at
+        timestamp updated_at
     }
 
     categories {
         bigint id PK
-        string content
+        varchar_255 content
         timestamp created_at
         timestamp updated_at
     }
 
     contacts {
-        bigint id PK
-        bigint category_id FK
-        string first_name
-        string last_name
-        int gender
-        string email
-        string tel
-        string address
-        string building
-        text detail
+        bigint_unsigned id PK
+        bigint_unsigned category_id FK
+        varchar_255 first_name
+        varchar_255 last_name
+        tinyint gender
+        varchar_255 email
+        varchar_11 tel
+        varchar_255 address
+        varchar_255 building
+        varchar_120 detail
         timestamp created_at
         timestamp updated_at
     }
 
     tags {
-        bigint id PK
-        string name
+        bigint_unsigned id PK
+        varchar_50 name UK
         timestamp created_at
         timestamp updated_at
     }
 
     contact_tag {
-        bigint id PK
-        bigint contact_id FK
-        bigint tag_id FK
+        bigint_unsigned id PK
+        bigint_unsigned contact_id FK UNIQUE(contact_id,tag_id)
+        bigint_unsigned tag_id FK
         timestamp created_at
         timestamp updated_at
     }
@@ -74,19 +75,14 @@ erDiagram
 
 ## 開発環境URL
 
-- フロントエンド：http://localhost
-- 管理画面：http://localhost/admin
-- phpMyAdmin:http://localhost:8080
+http://localhost
 
 ## 動作環境
 
-- PHP 8.2
-- Laravel 10
-- MySQL 8.0
 - Docker
-- Laravel Sail
-- Node.js
-- npm
+- Docker Compose
+
+※Windowsの場合はWSL2の利用を推奨します。
 
 ## 環境構築手順
 
@@ -96,43 +92,48 @@ erDiagram
     git clone https://github.com/mariekanno/contact-form-app.git
     ```
 
-2. **プロジェクトへ移動**
+2. **.envファイルの準備**
 
-    ```bash
-    cd contact-form app
+    .env.exampleをコピーして.envを作成します。
 
-3. **.envファイルの準備**
+   　cp .env.example .env
+
+   .envファイル内の以下のDB接続情報を確認・設定します。.envファイル内の以下のDB接続情報を確認・設定します。.env.exampleのデフォルト値はSail向けではないため、以下のように変更してください。
+
+   
+
+2. **.envファイルの準備**
 
     ```bash
    cp .env.example .env
 
-4. **Composer依存パッケージのインストール**
+3. **Composer依存パッケージのインストール**
 
     ```bash
     composer install
 
-5. **Laravel Sailの起動**
+4. **Laravel Sailの起動**
 
     ```bash
     ./vendor/bin/sail up -d
 
-6. **アプリケーションキーの生成**
+5. **アプリケーションキーの生成**
 
     ```bash
     ./vendor/bin/sail artisan key:generate
 
-7. **データベースのマイグレーションと初期データ投入**
+6. **データベースのマイグレーションと初期データ投入**
 
     ```bash
     ./vendor/bin/sail artisan migrate:fresh --seed
 
-8. **フロントエンドのビルド**
+7. **フロントエンドのビルド**
 
     ```bash
     ./vendor/bin/sail npm install
     ./vendor/bin/sail npm run build
 
-9. **アプリケーションへのアクセス**
+8. **アプリケーションへのアクセス**
 
     http://localhost
 
