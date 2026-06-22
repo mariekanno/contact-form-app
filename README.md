@@ -62,7 +62,7 @@ erDiagram
 
     contact_tag {
         bigint_unsigned id PK
-        bigint_unsigned contact_id FK UNIQUE(contact_id,tag_id)
+        bigint_unsigned contact_id FK
         bigint_unsigned tag_id FK
         timestamp created_at
         timestamp updated_at
