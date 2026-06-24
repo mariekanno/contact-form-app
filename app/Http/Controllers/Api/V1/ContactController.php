@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\IndexContactRequest;
 use App\Http\Requests\StoreContactRequest;
 use App\Http\Requests\UpdateContactRequest;
 use App\Http\Resources\ContactResource;
@@ -13,31 +14,33 @@ class ContactController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(IndexContactRequest $request)
     {
         $contacts = Contact::with(['category', 'tags']);
 
-        if (request()->filled('keyword')) {
-            $contacts->where(function ($query) {
-                $query->where('first_name', 'LIKE', '%'.request('keyword').'%')
-                    ->orWhere('last_name', 'LIKE', '%'.request('keyword').'%')
-                    ->orWhere('email', 'LIKE', '%'.request('keyword').'%');
+        if ($request->filled('keyword')) {
+            $keyword = $request->keyword;
+
+            $contacts->where(function ($query) use ($keyword) {
+                $query->where('first_name', 'LIKE', "%{$keyword}%")
+                    ->orWhere('last_name', 'LIKE', "%{$keyword}%")
+                    ->orWhere('email', 'LIKE', "%{$keyword}%");
             });
         }
 
-        if (request()->filled('gender')) {
-            $contacts->where('gender', request('gender'));
+        if ($request->filled('gender') && $request->gender != 0) {
+            $contacts->where('gender', $request->gender);
         }
 
-        if (request()->filled('category_id')) {
-            $contacts->where('category_id', request('category_id'));
+        if ($request->filled('category_id')) {
+            $contacts->where('category_id', $request->category_id);
         }
 
-        if (request()->filled('date')) {
-            $contacts->whereDate('created_at', request('date'));
+        if ($request->filled('date')) {
+            $contacts->whereDate('created_at', $request->date);
         }
 
-        $perPage = request('per_page', 20);
+        $perPage = $request->input('per_page', 20);
 
         $contacts = $contacts
             ->latest()
@@ -67,8 +70,13 @@ class ContactController extends Controller
      */
     public function show(string $id)
     {
-        $contact = Contact::with(['category', 'tags'])
-            ->findOrFail($id);
+        $contact = Contact::with(['category', 'tags'])->find($id);
+
+        if (! $contact) {
+            return response()->json([
+                'message' => 'Contact not found',
+            ], 404);
+        }
 
         return new ContactResource($contact);
     }
@@ -78,7 +86,13 @@ class ContactController extends Controller
      */
     public function update(UpdateContactRequest $request, string $id)
     {
-        $contact = Contact::findOrFail($id);
+        $contact = Contact::find($id);
+
+        if (! $contact) {
+            return response()->json([
+                'message' => 'Contact not found',
+            ], 404);
+        }
 
         $contact->update($request->validated());
 
@@ -96,7 +110,13 @@ class ContactController extends Controller
      */
     public function destroy(string $id)
     {
-        $contact = Contact::findOrFail($id);
+        $contact = Contact::find($id);
+
+        if (! $contact) {
+            return response()->json([
+                'message' => 'Contact not found',
+            ], 404);
+        }
 
         $contact->delete();
 
