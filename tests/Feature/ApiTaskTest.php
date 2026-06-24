@@ -29,18 +29,48 @@ class ApiTaskTest extends TestCase
         ], $override);
     }
 
-    public function test_お問い合わせ一覧取得_ap_i_正常系(): void
+    public function test_お問い合わせ一覧取得_api_正常系(): void
     {
         Contact::factory()->count(3)->create();
 
         $response = $this->getJson('/api/v1/contacts');
 
         $response->assertStatus(200);
+        // $response = $this->getJson('/api/v1/contacts');
+        // $response->dump();
         $response->assertJsonStructure(['data', 'links', 'meta']);
         $response->assertJsonCount(3, 'data');
     }
 
-    public function test_お問い合わせ一覧取得_ap_i_キーワード検索_正常系(): void
+    public function test_お問い合わせ一覧取得_api_バリデーション_異常系(): void
+    {
+        $patterns = [
+            ['gender' => 9],
+            ['category_id' => 999],
+            ['date' => 'abc'],
+            ['per_page' => 0],
+            ['per_page' => 101],
+            ['keyword' => str_repeat('a', 256)],
+        ];
+
+        foreach ($patterns as $query) {
+            $response = $this->getJson('/api/v1/contacts?'.http_build_query($query));
+
+            $response->assertStatus(422);
+        }
+    }
+
+    public function test_お問い合わせ一覧取得_api_検索条件未指定時も取得できる(): void
+    {
+        Contact::factory()->count(3)->create();
+
+        $response = $this->getJson('/api/v1/contacts');
+
+        $response->assertStatus(200);
+        $response->assertJsonCount(3, 'data');
+    }
+
+    public function test_お問い合わせ一覧取得_api_キーワード検索_正常系(): void
     {
         Contact::factory()->create(['first_name' => '太郎', 'email' => 'taro@example.com']);
         Contact::factory()->create(['first_name' => '花子', 'email' => 'hanako@example.com']);
@@ -48,11 +78,13 @@ class ApiTaskTest extends TestCase
         $response = $this->getJson('/api/v1/contacts?keyword=太郎');
 
         $response->assertStatus(200);
+        // $response = $this->getJson('/api/v1/contacts');
+        // $response->dump();
         $response->assertJsonCount(1, 'data');
         $response->assertJsonPath('data.0.email', 'taro@example.com');
     }
 
-    public function test_お問い合わせ一覧取得_ap_i_性別検索_正常系(): void
+    public function test_お問い合わせ一覧取得_api_性別検索_正常系(): void
     {
         Contact::factory()->create(['gender' => 1]);
         Contact::factory()->create(['gender' => 2]);
@@ -64,20 +96,29 @@ class ApiTaskTest extends TestCase
         $response->assertJsonPath('data.0.gender', 1);
     }
 
-    public function test_お問い合わせ一覧取得_ap_i_カテゴリ検索_正常系(): void
+    public function test_お問い合わせ一覧取得_api_カテゴリ検索_正常系(): void
     {
-        $category = Category::factory()->create();
+        $targetCategory = Category::factory()->create();
+        $otherCategory = Category::factory()->create();
 
-        Contact::factory()->create(['category_id' => $category->id]);
-        Contact::factory()->create();
+        Contact::factory()->create([
+            'category_id' => $targetCategory->id,
+            'email' => 'target@example.com',
+        ]);
 
-        $response = $this->getJson('/api/v1/contacts?category_id='.$category->id);
+        Contact::factory()->create([
+            'category_id' => $otherCategory->id,
+            'email' => 'other@example.com',
+        ]);
+
+        $response = $this->getJson('/api/v1/contacts?category_id='.$targetCategory->id);
 
         $response->assertStatus(200);
         $response->assertJsonCount(1, 'data');
+        $response->assertJsonPath('data.0.email', 'target@example.com');
     }
 
-    public function test_お問い合わせ一覧取得_ap_i_日付検索_正常系(): void
+    public function test_お問い合わせ一覧取得_api_日付検索_正常系(): void
     {
         Contact::factory()->create(['created_at' => '2026-06-18 10:00:00']);
         Contact::factory()->create(['created_at' => '2026-06-17 10:00:00']);
@@ -88,7 +129,7 @@ class ApiTaskTest extends TestCase
         $response->assertJsonCount(1, 'data');
     }
 
-    public function test_お問い合わせ一覧取得_ap_i_ページネーション_正常系(): void
+    public function test_お問い合わせ一覧取得_api_ページネーション_正常系(): void
     {
         Contact::factory()->count(5)->create();
 
@@ -100,7 +141,7 @@ class ApiTaskTest extends TestCase
         $response->assertJsonPath('meta.total', 5);
     }
 
-    public function test_お問い合わせ詳細取得_ap_i_正常系(): void
+    public function test_お問い合わせ詳細取得_api_正常系(): void
     {
         $contact = Contact::factory()->create();
 
@@ -110,14 +151,17 @@ class ApiTaskTest extends TestCase
         $response->assertJsonPath('data.id', $contact->id);
     }
 
-    public function test_お問い合わせ詳細取得_ap_i_存在しない_i_d_異常系(): void
+    public function test_お問い合わせ詳細取得_api_存在しないid_異常系(): void
     {
         $response = $this->getJson('/api/v1/contacts/99999');
 
         $response->assertStatus(404);
+        $response->assertJson([
+            'message' => 'Contact not found',
+        ]);
     }
 
-    public function test_お問い合わせ作成_ap_i_正常系(): void
+    public function test_お問い合わせ作成_api_正常系(): void
     {
         $tag = Tag::factory()->create();
 
@@ -134,7 +178,7 @@ class ApiTaskTest extends TestCase
         ]);
     }
 
-    public function test_お問い合わせ作成_ap_i_バリデーション異常系(): void
+    public function test_お問い合わせ作成_api_バリデーション異常系(): void
     {
         $response = $this->postJson('/api/v1/contacts', []);
 
@@ -151,7 +195,7 @@ class ApiTaskTest extends TestCase
         ]);
     }
 
-    public function test_お問い合わせ更新_ap_i_正常系(): void
+    public function test_お問い合わせ更新_api_正常系(): void
     {
         $contact = Contact::factory()->create();
 
@@ -171,7 +215,7 @@ class ApiTaskTest extends TestCase
         ]);
     }
 
-    public function test_お問い合わせ更新_ap_i_バリデーション異常系(): void
+    public function test_お問い合わせ更新_api_バリデーション異常系(): void
     {
         $contact = Contact::factory()->create();
 
@@ -190,7 +234,7 @@ class ApiTaskTest extends TestCase
         ]);
     }
 
-    public function test_お問い合わせ削除_ap_i_正常系(): void
+    public function test_お問い合わせ削除_api_正常系(): void
     {
         $contact = Contact::factory()->create();
 
@@ -202,7 +246,7 @@ class ApiTaskTest extends TestCase
         ]);
     }
 
-    public function test_お問い合わせ削除_ap_i_存在しない_i_d_異常系(): void
+    public function test_お問い合わせ削除_api_存在しないid_異常系(): void
     {
         $response = $this->deleteJson('/api/v1/contacts/99999');
 

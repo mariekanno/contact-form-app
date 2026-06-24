@@ -11,7 +11,6 @@ class AdminController extends Controller
 {
     public function index(IndexContactRequest $request)
     {
-        //dd($request->all());
 
         $query = Contact::with(['category', 'tags']);
 
@@ -29,15 +28,13 @@ class AdminController extends Controller
         }
 
         if ($request->filled('category_id')) {
+            // dd(Contact::first());
             $query->where('category_id', $request->category_id);
         }
 
         if ($request->filled('date')) {
             $query->whereDate('created_at', $request->date);
         }
-        
-        //dd($query->toSql(), $query->getBindings());
-        //dd($request->filled('category_id'), $request->category_id);
 
         $contacts = $query->latest()->paginate(7);
         $categories = Category::all();
@@ -48,6 +45,8 @@ class AdminController extends Controller
 
     public function show(Contact $contact)
     {
+        $contact->load(['category', 'tags']);
+
         return view('admin.show', compact('contact'));
     }
 
@@ -55,6 +54,6 @@ class AdminController extends Controller
     {
         $contact->delete();
 
-        return redirect()->route('admin.index');
+        return redirect('/admin');
     }
 }

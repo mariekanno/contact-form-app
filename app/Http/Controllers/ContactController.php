@@ -31,7 +31,7 @@ class ContactController extends Controller
     public function store(StoreContactRequest $request)
     {
         $contact = Contact::create($request->all());
-        $contact->tags()->attach($request->tags);
+        $contact->tags()->attach($request->tag_ids);
 
         return redirect('/thanks');
     }

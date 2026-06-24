@@ -65,7 +65,7 @@ class ContactControllerTest extends TestCase
             'address' => '東京都渋谷区',
             'building' => 'テストビル',
             'detail' => 'お問い合わせ内容です',
-            'tags' => $tags->pluck('id')->toArray(),
+            'tag_ids' => $tags->pluck('id')->toArray(),
         ];
 
         // Act
@@ -613,7 +613,7 @@ class ContactControllerTest extends TestCase
         $response->assertStatus(200);
     }
 
-    public function test_cs_vダウンロード_フィルタ条件付き_正常系(): void
+    public function test_csvダウンロード_フィルタ条件付き_正常系(): void
     {
         // Arrange
         $user = User::factory()->create();
@@ -643,7 +643,7 @@ class ContactControllerTest extends TestCase
         $this->assertStringNotContainsString('hanako@example.com', $csv);
     }
 
-    public function test_cs_vダウンロード_未指定時は新着順_正常系(): void
+    public function test_csvダウンロード_未指定時は新着順_正常系(): void
     {
         // Arrange
         $user = User::factory()->create();
@@ -673,5 +673,41 @@ class ContactControllerTest extends TestCase
             strpos($csv, 'old@example.com'),
             strpos($csv, 'new@example.com')
         );
+    }
+
+    public function test_csvエクスポート_正しいフィルター条件は受け付ける(): void
+    {
+        $user = User::factory()->create();
+        $category = Category::factory()->create();
+
+        Contact::factory()->create([
+            'gender' => 1,
+            'category_id' => $category->id,
+        ]);
+
+        $response = $this->actingAs($user)
+            ->get('/contacts/export?'.http_build_query([
+                'gender' => 1,
+                'category_id' => $category->id,
+            ]));
+
+        $response->assertOk();
+    }
+
+    public function test_csvエクスポート_不正なフィルター条件は拒否される(): void
+    {
+        $user = User::factory()->create();
+
+        $patterns = [
+            ['gender' => 9],
+            ['category_id' => 999],
+        ];
+
+        foreach ($patterns as $query) {
+            $response = $this->actingAs($user)
+                ->get('/contacts/export?'.http_build_query($query));
+
+            $response->assertSessionHasErrors(array_key_first($query));
+        }
     }
 }
