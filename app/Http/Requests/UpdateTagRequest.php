@@ -10,6 +10,7 @@ class UpdateTagRequest extends FormRequest
     /**
      * Determine if the user is authorized to make this request.
      */
+    // このリクエストを許可する
     public function authorize(): bool
     {
         return true;
@@ -20,13 +21,18 @@ class UpdateTagRequest extends FormRequest
      *
      * @return array<string, ValidationRule|array<mixed>|string>
      */
+    // 
     public function rules(): array
     {
         return [
             'name' => [
+                // タグ名(必須)
                 'required',
+                // 文字列
                 'string',
+                // 50文字以内
                 'max:50',
+                // 自分自身のタグIDは除外して、他のタグ名と重複しないか確認する
                 'unique:tags,name,'.optional($this->tag)->id,
             ],
         ];

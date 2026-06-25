@@ -11,6 +11,7 @@ class Contact extends Model
 {
     use HasFactory;
 
+    // 一括代入を許可するカラム
     protected $fillable = [
         'first_name',
         'last_name',
@@ -23,13 +24,17 @@ class Contact extends Model
         'category_id',
     ];
 
+    // Categoryモデルとのリレーションを定義する
     public function category(): BelongsTo
     {
+        // Contactは1つのCategoryに所属する
         return $this->belongsTo(Category::class);
     }
 
+    // Tagモデルとのリレーションを定義する
     public function tags(): BelongsToMany
     {
+        // Contactは複数のタグと関連付けられる
         return $this->belongsToMany(Tag::class);
     }
 }

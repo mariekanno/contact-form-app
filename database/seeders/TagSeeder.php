@@ -10,6 +10,7 @@ class TagSeeder extends Seeder
     /**
      * Run the database seeds.
      */
+    // Tagテーブルに初期データを登録する
     public function run(): void
     {
         Tag::create([

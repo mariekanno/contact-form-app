@@ -12,6 +12,7 @@ class ContactResource extends JsonResource
      *
      * @return array<string, mixed>
      */
+    // APIで返却するデータを配列として定義する
     public function toArray(Request $request): array
     {
         return [
