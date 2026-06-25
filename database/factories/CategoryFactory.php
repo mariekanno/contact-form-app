@@ -18,6 +18,7 @@ class CategoryFactory extends Factory
     public function definition(): array
     {
         return [
+            // 配列の中から重複しないカテゴリ名をランダムに1つ選択する
             'content' => $this->faker->unique()->randomElement([
                 '商品のお届けについて',
                 '商品の交換について',

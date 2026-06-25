@@ -10,6 +10,7 @@ class CategorySeeder extends Seeder
     /**
      * Run the database seeds.
      */
+    // Categoryテーブルに初期データを登録する
     public function run(): void
     {
         Category::create([

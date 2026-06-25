@@ -18,6 +18,7 @@ class TagFactory extends Factory
     public function definition(): array
     {
         return [
+            // 配列の中から重複しないタグ名をランダムに1つ選択する
             'name' => $this->faker->unique()->randomElement([
                 '質問',
                 '要望',

@@ -10,6 +10,7 @@ class UpdateContactRequest extends FormRequest
     /**
      * Determine if the user is authorized to make this request.
      */
+    // このリクエストを許可する
     public function authorize(): bool
     {
         return true;
@@ -23,16 +24,27 @@ class UpdateContactRequest extends FormRequest
     public function rules(): array
     {
         return [
+            // 姓(必須、255文字以内)
             'first_name' => 'required|string|max:255',
+            // 名(必須、255文字以内)
             'last_name' => 'required|string|max:255',
+            // 性別(必須、1:男性、2:女性、3:その他)
             'gender' => 'required|integer|in:1,2,3',
+            // メールアドレス(必須、メール形式、255文字以内)
             'email' => 'required|string|email|max:255',
+            // 電話番号(必須、10桁または11桁の数字)
             'tel' => 'required|string|regex:/^[0-9]{10,11}$/',
+            // 住所(必須、255文字以内)
             'address' => 'required|string|max:255',
+            // 建物名(任意、255文字以内)
             'building' => 'nullable|string|max:255',
+            // カテゴリID(必須、categoriesテーブルに存在するID)
             'category_id' => 'required|integer|exists:categories,id',
+            // お問い合わせ内容(必須、120文字以内)
             'detail' => 'required|string|max:120',
+            // タグID配列(任意)
             'tag_ids' => 'nullable|array',
+            // 各タグIDがtagsテーブルに存在するか確認
             'tag_ids.*' => 'integer|exists:tags,id',
         ];
     }
